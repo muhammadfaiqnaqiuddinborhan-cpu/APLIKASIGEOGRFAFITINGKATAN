@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kembara Iklim Asia - Geografi Tingkatan 2 (Bab 4.1)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#0284c7',
+                            darkblue: '#0369a1',
+                            yellow: '#f59e0b',
+                            green: '#10b981',
+                            purple: '#8b5cf6',
+                            pink: '#ec4899',
+                            orange: '#f97316'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #fef3c7 100%);
+            min-height: 100vh;
+        }
+
+        .font-game {
+            font-family: 'Fredoka', cursive;
+        }
+
+        .btn-bounce {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-bounce:hover {
+            transform: translateY(-3px) scale(1.02);
+        }
+        .btn-bounce:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .card-pop {
+            transition: all 0.3s ease;
+        }
+        .card-pop:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #38bdf8;
+            border-radius: 10px;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.9); }
+        }
+        .glow-active {
+            animation: pulseGlow 2s infinite;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .floating {
+            animation: floatSlow 3s ease-in-out infinite;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Sound Effect Toggle & Toast System -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Main Navigation Bar (Visible after login) -->
+    <header id="main-header" class="hidden sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b-4 border-amber-400 shadow-md transition-all">
+        <div class="max-w-6xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-3">
+            <!-- App Title & Teacher Info -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-amber-400 flex items-center justify-center text-white text-xl shadow-inner font-bold font-game">
+                    🌍
+                </div>
+                <div>
+                    <h1 class="font-game text-lg md:text-xl font-bold text-sky-900 leading-none">Kembara Iklim Asia</h1>
+                    <p class="text-xs text-sky-600 font-medium">Geografi T2 • Cikgu Faiq Naqiuddin</p>
+                </div>
+            </div>
+
+            <!-- Student Profile Badges -->
+            <div class="flex items-center gap-3 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-200">
+                <div id="header-avatar" class="text-2xl floating">🦁</div>
+                <div class="flex flex-col">
+                    <span id="header-name" class="font-bold text-sm text-slate-800 leading-tight">Nama Pelajar</span>
+                    <span id="header-class" class="text-xs font-semibold text-amber-600">Kelas: 2J</span>
+                </div>
+            </div>
+
+            <!-- XP & Sound Controls -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1.5 bg-amber-100 text-amber-800 px-3 py-1.5 rounded-full font-bold text-sm border border-amber-300">
+                    <i class="fa-solid font-bold text-amber-500 fa-star text-base"></i>
+                    <span id="player-xp">0</span> <span class="text-xs">XP</span>
+                </div>
+
+                <button id="sound-toggle" onclick="toggleAudio()" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700 text-lg transition border border-slate-300">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6 flex flex-col justify-center">
+
+        <!-- SCREEN 1: LOGIN / AVATAR SELECTION -->
+        <section id="screen-login" class="max-w-md mx-auto w-full bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-sky-300 floating my-auto">
+            <div class="text-center mb-6">
+                <div class="inline-block p-3 bg-amber-100 rounded-full text-4xl mb-3">
+                    🗺️
+                </div>
+                <h2 class="font-game text-2xl md:text-3xl text-sky-900 font-bold">Selamat Datang!</h2>
+                <p class="text-sm text-slate-600 mt-1">Bab 4.1: Kepelbagaian Iklim & Kegiatan Manusia di Asia</p>
+                <div class="mt-2 text-xs bg-sky-50 inline-block px-3 py-1 rounded-full border border-sky-200 font-medium text-sky-700">
+                    👨‍🏫 Modul Cikgu Faiq Naqiuddin
+                </div>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">
+                        <i class="fa-solid fa-user text-sky-500 mr-1"></i> Nama Murid
+                    </label>
+                    <input type="text" id="input-student-name" required placeholder="Masukkan nama kamu..." 
+                        class="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-sky-500 focus:outline-none font-medium text-slate-800 transition">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">
+                        <i class="fa-solid fa-school text-sky-500 mr-1"></i> Kelas
+                    </label>
+                    <input type="text" id="input-student-class" value="2J" readonly 
+                        class="w-full px-4 py-2.5 bg-slate-100 rounded-2xl border-2 border-slate-200 font-semibold text-slate-600 cursor-not-allowed">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">
+                        <i class="fa-solid fa-face-smile text-amber-500 mr-1"></i> Pilih Avatar Kamu
+                    </label>
+                    <div class="grid grid-cols-4 gap-2.5" id="avatar-picker-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-game text-xl py-3.5 px-6 rounded-2xl shadow-lg shadow-orange-500/30 btn-bounce flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rocket"></i> Mula Kembara!
+                </button>
+            </form>
+        </section>
+
+        <!-- SCREEN 2: DASHBOARD & MISSION HUB -->
+        <section id="screen-dashboard" class="hidden space-y-6">
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-r from-sky-600 to-indigo-600 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                <div class="z-10 text-center md:text-left">
+                    <span class="bg-amber-400 text-slate-900 font-bold text-xs uppercase px-3 py-1 rounded-full font-game tracking-wider">Misi Pembelajaran</span>
+                    <h2 class="font-game text-2xl md:text-3xl font-bold mt-2">Sedia Untuk Menjadi Pakar Iklim Asia?</h2>
+                    <p class="text-sky-100 text-sm mt-1 max-w-xl">Lengkapkan 4 misi utama di bawah untuk mengumpul mata XP dan dapatkan <b>Sijil Penguasaan Bab 4.1</b> daripada Cikgu Faiq!</p>
+                </div>
+                <div class="z-10 flex items-center gap-4 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20">
+                    <div class="text-center">
+                        <div class="text-xs text-sky-200">Kemajuan</div>
+                        <div id="overall-progress-text" class="font-game text-2xl font-bold">0%</div>
+                    </div>
+                    <div class="w-16 h-16 rounded-full bg-amber-400 flex items-center justify-center text-3xl shadow-lg">
+                        🏆
+                    </div>
+                </div>
+                <!-- Decorative element -->
+                <i class="fa-solid fa-earth-asia absolute -bottom-10 -right-10 text-9xl text-white/10 pointer-events-none"></i>
+            </div>
+
+            <!-- Mission Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                <!-- MISSION 1 CARD -->
+                <div class="bg-white rounded-3xl p-6 border-2 border-sky-100 shadow-md card-pop flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="bg-sky-100 text-sky-800 font-bold text-xs px-3 py-1 rounded-full">MISI 1</span>
+                            <span id="m1-status" class="text-xs font-semibold text-slate-400"><i class="fa-regular fa-circle mr-1"></i> Belum Selesai</span>
+                        </div>
+                        <h3 class="font-game text-xl font-bold text-slate-800 mb-2"><i class="fa-solid fa-compass text-sky-500 mr-2"></i>Peneroka Zon Iklim Asia</h3>
+                        <p class="text-xs text-slate-600 mb-4">Pelajari 4 zon iklim Asia (Zon Panas, Panas Sederhana, Sejuk Sederhana, Sejuk) beserta ciri dan kegiatan manusia.</p>
+                    </div>
+                    <button onclick="startMission(1)" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-game py-2.5 px-4 rounded-xl btn-bounce flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play"></i> Terokai Sekarang (+100 XP)
+                    </button>
+                </div>
+
+                <!-- MISSION 2 CARD -->
+                <div class="bg-white rounded-3xl p-6 border-2 border-emerald-100 shadow-md card-pop flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="bg-emerald-100 text-emerald-800 font-bold text-xs px-3 py-1 rounded-full">MISI 2</span>
+                            <span id="m2-status" class="text-xs font-semibold text-slate-400"><i class="fa-regular fa-circle mr-1"></i> Belum Selesai</span>
+                        </div>
+                        <h3 class="font-game text-xl font-bold text-slate-800 mb-2"><i class="fa-solid fa-map-location-dot text-emerald-500 mr-2"></i>Padanan Negara & Zon Iklim</h3>
+                        <p class="text-xs text-slate-600 mb-4">Uji ingatan anda! Padankan negara-negara di Asia seperti Arab Saudi, Jepun, dan Siberia ke zon iklim yang betul.</p>
+                    </div>
+                    <button onclick="startMission(2)" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-game py-2.5 px-4 rounded-xl btn-bounce flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-puzzle-piece"></i> Main Padanan (+100 XP)
+                    </button>
+                </div>
+
+                <!-- MISSION 3 CARD -->
+                <div class="bg-white rounded-3xl p-6 border-2 border-purple-100 shadow-md card-pop flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="bg-purple-100 text-purple-800 font-bold text-xs px-3 py-1 rounded-full">MISI 3</span>
+                            <span id="m3-status" class="text-xs font-semibold text-slate-400"><i class="fa-regular fa-circle mr-1"></i> Belum Selesai</span>
+                        </div>
+                        <h3 class="font-game text-xl font-bold text-slate-800 mb-2"><i class="fa-solid fa-person-digging text-purple-500 mr-2"></i>Cabaran Kegiatan Manusia</h3>
+                        <p class="text-xs text-slate-600 mb-4">Analisis pengaruh iklim terhadap pertanian, perikanan, penternakan unta, dan pemburuan di pelbagai rantau Asia.</p>
+                    </div>
+                    <button onclick="startMission(3)" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-game py-2.5 px-4 rounded-xl btn-bounce flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-bolt"></i> Mula Cabaran (+150 XP)
+                    </button>
+                </div>
+
+                <!-- MISSION 4 CARD -->
+                <div class="bg-white rounded-3xl p-6 border-2 border-amber-100 shadow-md card-pop flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="bg-amber-100 text-amber-800 font-bold text-xs px-3 py-1 rounded-full">MISI 4</span>
+                            <span id="m4-status" class="text-xs font-semibold text-slate-400"><i class="fa-regular fa-circle mr-1"></i> Belum Selesai</span>
+                        </div>
+                        <h3 class="font-game text-xl font-bold text-slate-800 mb-2"><i class="fa-solid fa-graduation-cap text-amber-500 mr-2"></i>Ujian Refleksi (TP1 - TP3)</h3>
+                        <p class="text-xs text-slate-600 mb-4">Kuiz formatif untuk menentukan Tahap Penguasaan (TP) anda bagi Bab 4.1 Geografi Tingkatan 2.</p>
+                    </div>
+                    <button onclick="startMission(4)" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-game py-2.5 px-4 rounded-xl btn-bounce flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-pen-to-square"></i> Jawab Kuiz (+150 XP)
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Certificate Action Card -->
+            <div id="certificate-unlock-card" class="bg-amber-50 rounded-3xl p-6 border-2 border-amber-300 text-center space-y-3">
+                <div class="text-4xl">📜</div>
+                <h3 class="font-game text-2xl font-bold text-amber-900">Sijil Penguasaan Bab 4.1</h3>
+                <p class="text-sm text-slate-600 max-w-lg mx-auto">Lengkapkan keempat-empat misi di atas untuk membuka Sijil Penguasaan rasmi anda daripada Cikgu Faiq Naqiuddin!</p>
+                <button id="btn-view-certificate" disabled onclick="showCertificate()" class="px-8 py-3 bg-slate-300 text-slate-500 font-game text-lg rounded-2xl cursor-not-allowed transition">
+                    <i class="fa-solid fa-lock mr-2"></i> Kunci Sijil Terkunci
+                </button>
+            </div>
+        </section>
+
+        <!-- MISSION 1: CLIMATE ZONES EXPLORER -->
+        <section id="mission-1" class="hidden space-y-6">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <button onclick="returnToDashboard()" class="text-sm font-bold text-sky-600 hover:text-sky-800 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Menu
+                </button>
+                <span class="bg-sky-100 text-sky-800 font-bold text-sm px-4 py-1.5 rounded-full font-game">Misi 1: Penjelajah Zon Iklim</span>
+            </div>
+
+            <!-- Climate Zone Navigation Tabs -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <button onclick="switchZoneTab('panas')" id="tab-panas" class="zone-tab font-game py-3 px-4 rounded-2xl border-2 border-orange-400 bg-orange-500 text-white font-bold text-sm text-center transition shadow-md">
+                    ☀️ Zon Panas
+                </button>
+                <button onclick="switchZoneTab('panas-sederhana')" id="tab-panas-sederhana" class="zone-tab font-game py-3 px-4 rounded-2xl border-2 border-amber-300 bg-white text-slate-700 font-bold text-sm text-center transition">
+                    🌤️ Zon Panas Sederhana
+                </button>
+                <button onclick="switchZoneTab('sejuk-sederhana')" id="tab-sejuk-sederhana" class="zone-tab font-game py-3 px-4 rounded-2xl border-2 border-teal-300 bg-white text-slate-700 font-bold text-sm text-center transition">
+                    🌲 Zon Sejuk Sederhana
+                </button>
+                <button onclick="switchZoneTab('sejuk')" id="tab-sejuk" class="zone-tab font-game py-3 px-4 rounded-2xl border-2 border-cyan-300 bg-white text-slate-700 font-bold text-sm text-center transition">
+                    ❄️ Zon Sejuk
+                </button>
+            </div>
+
+            <!-- Zone Content Display Card -->
+            <div id="zone-content" class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-slate-100">
+                <!-- Content dynamically populated via JavaScript -->
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="completeMission1()" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-game text-lg px-8 py-3 rounded-2xl shadow-lg btn-bounce flex items-center gap-2">
+                    <i class="fa-solid fa-check-circle"></i> Selesai Teroka & Teim XP!
+                </button>
+            </div>
+        </section>
+
+        <!-- MISSION 2: COUNTRY MATCHING GAME -->
+        <section id="mission-2" class="hidden space-y-6">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <button onclick="returnToDashboard()" class="text-sm font-bold text-sky-600 hover:text-sky-800 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Menu
+                </button>
+                <span class="bg-emerald-100 text-emerald-800 font-bold text-sm px-4 py-1.5 rounded-full font-game">Misi 2: Padanan Negara & Zon Iklim</span>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-emerald-100 text-center">
+                <p class="text-slate-600 text-sm mb-4">Tekan <b>Negara</b> di sebelah kiri, kemudian tekan <b>Zon Iklim</b> yang betul di sebelah kanan!</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                    <!-- Column 1: Countries -->
+                    <div class="space-y-3">
+                        <h4 class="font-game text-slate-700 text-base font-bold text-center bg-slate-100 py-2 rounded-xl">📍 Pilih Negara</h4>
+                        <div id="match-countries-container" class="space-y-2.5">
+                            <!-- JS injected -->
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Climate Zones -->
+                    <div class="space-y-3">
+                        <h4 class="font-game text-slate-700 text-base font-bold text-center bg-slate-100 py-2 rounded-xl">🌡️ Pilih Zon Iklim</h4>
+                        <div id="match-zones-container" class="space-y-2.5">
+                            <!-- JS injected -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-between items-center bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                    <div class="text-sm font-bold text-emerald-900">
+                        Skor Padanan: <span id="m2-score" class="text-emerald-600 font-game text-xl">0</span> / 4
+                    </div>
+                    <button id="m2-complete-btn" disabled onclick="completeMission2()" class="bg-slate-300 text-slate-500 font-game px-6 py-2.5 rounded-xl cursor-not-allowed">
+                        Teruskan Misi <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MISSION 3: HUMAN ACTIVITIES QUIZ -->
+        <section id="mission-3" class="hidden space-y-6">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <button onclick="returnToDashboard()" class="text-sm font-bold text-sky-600 hover:text-sky-800 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Menu
+                </button>
+                <span class="bg-purple-100 text-purple-800 font-bold text-sm px-4 py-1.5 rounded-full font-game">Misi 3: Cabaran Kegiatan Manusia</span>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-purple-100">
+                <!-- Progress Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <span id="m3-q-num" class="font-game text-purple-700 font-bold text-sm">Soalan 1 dari 4</span>
+                    <span class="text-xs bg-purple-50 text-purple-700 px-3 py-1 rounded-full font-semibold border border-purple-200">Bab 4.1: Pengaruh Iklim</span>
+                </div>
+
+                <!-- Question Box -->
+                <div id="m3-question-box" class="space-y-4">
+                    <!-- Dynamic Question inserted by JS -->
+                </div>
+
+                <!-- Action Button -->
+                <div class="mt-6 flex justify-end">
+                    <button id="m3-next-btn" onclick="nextMission3Question()" class="hidden bg-purple-600 hover:bg-purple-700 text-white font-game px-6 py-2.5 rounded-xl btn-bounce">
+                        Soalan Seterusnya <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MISSION 4: REFLECTION QUIZ (TP1 - TP3) -->
+        <section id="mission-4" class="hidden space-y-6">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <button onclick="returnToDashboard()" class="text-sm font-bold text-sky-600 hover:text-sky-800 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Menu
+                </button>
+                <span class="bg-amber-100 text-amber-800 font-bold text-sm px-4 py-1.5 rounded-full font-game">Misi 4: Ujian Refleksi (TP1-TP3)</span>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-amber-100">
+                <div class="flex items-center justify-between mb-4">
+                    <span id="m4-q-num" class="font-game text-amber-700 font-bold text-sm">Soalan 1 dari 3</span>
+                    <span id="m4-tp-badge" class="text-xs bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-bold">Aras TP1</span>
+                </div>
+
+                <div id="m4-question-box" class="space-y-4">
+                    <!-- Dynamic question content -->
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button id="m4-next-btn" onclick="nextMission4Question()" class="hidden bg-amber-500 hover:bg-amber-600 text-white font-game px-6 py-2.5 rounded-xl btn-bounce">
+                        Seterusnya <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCREEN 3: SIJIL PENGUASAAN (CERTIFICATE OF ACHIEVEMENT) -->
+        <section id="screen-certificate" class="hidden space-y-6 max-w-4xl mx-auto w-full">
+            <div class="no-print flex justify-between items-center">
+                <button onclick="returnToDashboard()" class="text-sm font-bold text-sky-600 hover:text-sky-800 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Menu
+                </button>
+                <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-white font-game px-5 py-2 rounded-xl btn-bounce shadow-md">
+                    <i class="fa-solid fa-print mr-1"></i> Cetak / Simpan Sijil
+                </button>
+            </div>
+
+            <!-- Certificate Canvas Container -->
+            <div class="bg-white p-8 md:p-12 rounded-3xl shadow-2xl border-8 border-amber-400 relative overflow-hidden text-center space-y-6">
+                <!-- Watermark -->
+                <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+                    <i class="fa-solid fa-graduation-cap text-[28rem] text-amber-900"></i>
+                </div>
+
+                <!-- Header -->
+                <div class="space-y-2">
+                    <div class="text-4xl">🏅</div>
+                    <h2 class="font-game text-3xl md:text-4xl font-bold text-amber-900 tracking-wide uppercase">Sijil Penguasaan Pembelajaran</h2>
+                    <p class="text-slate-500 text-sm font-semibold tracking-widest uppercase">Geografi Tingkatan 2 • Bab 4.1 Kepelbagaian Iklim di Asia</p>
+                </div>
+
+                <div class="w-32 h-1 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300 mx-auto rounded-full"></div>
+
+                <!-- Student Name & Details -->
+                <div class="space-y-3 py-4">
+                    <p class="text-slate-600 text-base">Dengan ini diperakukan bahawa murid:</p>
+                    <h3 id="cert-student-name" class="font-game text-3xl md:text-4xl text-sky-900 font-bold underline decoration-amber-400 decoration-wavy">NAMA PELAJAR</h3>
+                    <p id="cert-student-class" class="text-base font-semibold text-slate-700">Kelas: 2 Juara (2J)</p>
+                </div>
+
+                <p class="text-slate-600 text-sm max-w-xl mx-auto leading-relaxed">
+                    Telah berjaya menyelesaikan seluruh siri tugasan interaktif, kuiz refleksi, dan padanan topik <b>Kepelbagaian Iklim dan Pengaruhnya Terhadap Kegiatan Manusia di Asia</b> dengan pencapaian yang amat cemerlang!
+                </p>
+
+                <!-- Achievement Stats Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-lg mx-auto py-2">
+                    <div class="bg-amber-50 p-3 rounded-2xl border border-amber-200">
+                        <div class="text-xs text-amber-800 font-semibold">Mata XP Dikumpul</div>
+                        <div id="cert-xp" class="font-game text-2xl font-bold text-amber-600">500 XP</div>
+                    </div>
+                    <div class="bg-sky-50 p-3 rounded-2xl border border-sky-200">
+                        <div class="text-xs text-sky-800 font-semibold">Tahap Penguasaan</div>
+                        <div id="cert-tp" class="font-game text-2xl font-bold text-sky-600">TP 3</div>
+                    </div>
+                    <div class="col-span-2 md:col-span-1 bg-emerald-50 p-3 rounded-2xl border border-emerald-200">
+                        <div class="text-xs text-emerald-800 font-semibold">Status Misi</div>
+                        <div class="font-game text-lg font-bold text-emerald-600">100% Selesai</div>
+                    </div>
+                </div>
+
+                <!-- Signature Section -->
+                <div class="pt-8 flex justify-around items-end">
+                    <div class="text-center">
+                        <div class="font-game text-lg font-bold text-slate-800">Cikgu Faiq Naqiuddin</div>
+                        <div class="text-xs text-slate-500 font-medium">Guru Geografi Tingkatan 2</div>
+                        <div class="w-40 border-b-2 border-slate-300 mt-2 mx-auto"></div>
+                    </div>
+                    <div class="w-20 h-20 bg-amber-100 rounded-full border-4 border-amber-400 flex items-center justify-center text-amber-800 font-bold text-xs shadow-md transform rotate-12">
+                        DISAHKAN<br>LULUS
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Global App State
+        let gameState = {
+            playerName: '',
+            playerClass: '2J',
+            avatar: '🦁',
+            xp: 0,
+            soundEnabled: true,
+            missionsCompleted: {
+                m1: false,
+                m2: false,
+                m3: false,
+                m4: false
+            },
+            m2Score: 0,
+            m3Score: 0,
+            m4Score: 0
+        };
+
+        // Web Audio API Synthesizer (No external MP3 files needed)
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+        }
+
+        function playSound(type) {
+            if (!gameState.soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.linearRampToValueAtTime(120, now + 0.2);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'fanfare') {
+                    // Victory Chime
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.type = 'triangle';
+                        o.frequency.setValueAtTime(freq, now + (i * 0.12));
+                        g.gain.setValueAtTime(0.2, now + (i * 0.12));
+                        g.gain.linearRampToValueAtTime(0.01, now + (i * 0.12) + 0.25);
+                        o.start(now + (i * 0.12));
+                        o.stop(now + (i * 0.12) + 0.25);
+                    });
+                }
+            } catch (e) {
+                console.log("Audio not allowed yet");
+            }
+        }
+
+        function toggleAudio() {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (gameState.soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                showToast('🔕 Bunyi diaktifkan');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                showToast('🔇 Bunyi dinyahaktifkan');
+            }
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-900/90 text-white font-medium text-xs px-4 py-2.5 rounded-2xl shadow-lg border border-slate-700 flex items-center gap-2 transition-all transform translate-y-2 opacity-0';
+            toast.innerHTML = msg;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        function addXP(amount) {
+            gameState.xp += amount;
+            document.getElementById('player-xp').innerText = gameState.xp;
+            playSound('success');
+            showToast(`⭐ +${amount} XP Ditambah!`);
+        }
+
+        const avatars = ['🦁', '🐯', '🦊', '🐼', '🐸', '🤖', '🧙‍♂️', '🚀'];
+
+        function initLoginScreen() {
+            const grid = document.getElementById('avatar-picker-grid');
+            grid.innerHTML = '';
+            avatars.forEach((emoji, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `p-3 text-2xl rounded-2xl border-2 transition ${idx === 0 ? 'border-amber-400 bg-amber-50 scale-105' : 'border-slate-200 bg-white'}`;
+                btn.innerText = emoji;
+                btn.onclick = () => {
+                    playSound('click');
+                    gameState.avatar = emoji;
+                    document.querySelectorAll('#avatar-picker-grid button').forEach(b => {
+                        b.className = 'p-3 text-2xl rounded-2xl border-2 border-slate-200 bg-white transition';
+                    });
+                    btn.className = 'p-3 text-2xl rounded-2xl border-2 border-amber-400 bg-amber-50 scale-105 transition';
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            playSound('success');
+            const nameInput = document.getElementById('input-student-name').value.trim();
+            if (!nameInput) return;
+
+            gameState.playerName = nameInput;
+
+            // Update UI Header
+            document.getElementById('header-name').innerText = gameState.playerName;
+            document.getElementById('header-avatar').innerText = gameState.avatar;
+            document.getElementById('main-header').classList.remove('hidden');
+
+            // Switch to Dashboard
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-dashboard').classList.remove('hidden');
+
+            showToast(`👋 Selamat Datang, ${gameState.playerName}!`);
+        }
+
+        function returnToDashboard() {
+            playSound('click');
+            const screens = ['mission-1', 'mission-2', 'mission-3', 'mission-4', 'screen-certificate'];
+            screens.forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById('screen-dashboard').classList.remove('hidden');
+            updateDashboardProgress();
+        }
+
+        function updateDashboardProgress() {
+            let doneCount = 0;
+            if (gameState.missionsCompleted.m1) {
+                doneCount++;
+                document.getElementById('m1-status').innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Selesai';
+            }
+            if (gameState.missionsCompleted.m2) {
+                doneCount++;
+                document.getElementById('m2-status').innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Selesai';
+            }
+            if (gameState.missionsCompleted.m3) {
+                doneCount++;
+                document.getElementById('m3-status').innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Selesai';
+            }
+            if (gameState.missionsCompleted.m4) {
+                doneCount++;
+                document.getElementById('m4-status').innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Selesai';
+            }
+
+            const pct = Math.round((doneCount / 4) * 100);
+            document.getElementById('overall-progress-text').innerText = `${pct}%`;
+
+            if (doneCount === 4) {
+                const certBtn = document.getElementById('btn-view-certificate');
+                certBtn.disabled = false;
+                certBtn.className = 'px-8 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-game text-lg rounded-2xl shadow-lg btn-bounce cursor-pointer glow-active';
+                certBtn.innerHTML = '<i class="fa-solid fa-award mr-2"></i> Buka Sijil Penguasaan Kamu!';
+            }
+        }
+
+        function startMission(num) {
+            playSound('click');
+            document.getElementById('screen-dashboard').classList.add('hidden');
+            document.getElementById(`mission-${num}`).classList.remove('hidden');
+
+            if (num === 1) renderZoneContent('panas');
+            if (num === 2) initMission2();
+            if (num === 3) initMission3();
+            if (num === 4) initMission4();
+        }
+
+        const zonesData = {
+            'panas': {
+                title: 'Zon Panas (10°S hingga 30°U)',
+                bg: 'bg-orange-50 border-orange-200',
+                icon: '☀️',
+                climates: 'Iklim Gurun Panas, Iklim Khatulistiwa, Iklim Monsun Tropika',
+                countries: 'Arab Saudi, Malaysia, Thailand, Oman, India',
+                features: 'Panas dan kering sepanjang tahun (Gurun Panas) ATAU Panas & lembap sepanjang tahun (Khatulistiwa). Min suhu tahunan melebihi 27°C.',
+                activities: [
+                    { name: 'Penternakan Unta & Kambing', desc: 'Dijalankan di rantau Gurun Panas seperti Arab Saudi untuk mendapatkan susu dan daging.' },
+                    { name: 'Penanaman Kurma & Gandum', desc: 'Di kawasan oasis Gurun Panas serta penanaman Padi di rantau Monsun Tropika.' }
+                ]
+            },
+            'panas-sederhana': {
+                title: 'Zon Panas Sederhana (30°U hingga 45°U)',
+                bg: 'bg-amber-50 border-amber-200',
+                icon: '🌤️',
+                climates: 'Iklim China, Iklim Mediterranean',
+                countries: 'China (Tengah/Selatan), Jepun (Selatan), Korea Selatan, Turki',
+                features: 'Mengalami empat musim (Musim Bunga, Panas, Luruh, Sejuk). Musim panas yang sederhana panas dan musim sejuk yang sejuk.',
+                activities: [
+                    { name: 'Penanaman Padi & Teh', desc: 'Sangat giat di kawasan iklim China kerana hujan yang mencukupi semasa musim panas.' },
+                    { name: 'Penternakan Ulat Sutera', desc: 'Industri sutera tradisional di China dan Korea Selatan.' }
+                ]
+            },
+            'sejuk-sederhana': {
+                title: 'Zon Sejuk Sederhana (45°U hingga 65°U)',
+                bg: 'bg-teal-50 border-teal-200',
+                icon: '🌲',
+                climates: 'Iklim Laurentia, Iklim Steppe',
+                countries: 'Jepun (Utara / Hokkaido), China (Utara), Korea Utara',
+                features: 'Musim panas yang singkat dan sederhana, musim sejuk yang sangat sejuk dan panjang. Hujan turun sepanjang tahun.',
+                activities: [
+                    { name: 'Perikanan Utama (Hokkaido)', desc: 'Pertemuan arus panas (Kuroshio) & arus sejuk (Oyashio) menggalakkan pembiakan plankton di perairan Jepun.' },
+                    { name: 'Pembalakan Kayu Lembut', desc: 'Pembalakan pokok konifer (Taiga) untuk industri kertas dan pembinaan.' }
+                ]
+            },
+            'sejuk': {
+                title: 'Zon Sejuk (65°U hingga 90°U)',
+                bg: 'bg-cyan-50 border-cyan-200',
+                icon: '❄️',
+                climates: 'Iklim Tundra / Iklim Siberia',
+                countries: 'Siberia (Rusia Utara)',
+                features: 'Sangat sejuk sepanjang tahun. Musim sejuk yang terlampau panjang (sehingga 8 bulan) dengan suhu di bawah 0°C.',
+                activities: [
+                    { name: 'Memburu Anjing Laut / Karibu', desc: 'Dijalankan oleh penduduk tempatan (Inuit/Eskimo) untuk makanan, pakaian dan lemak.' },
+                    { name: 'Penternakan Rusa Kutub (Reindeer)', desc: 'Penternakan nomad untuk pengangkutan dan sumber daging di padang Tundra.' }
+                ]
+            }
+        };
+
+        function switchZoneTab(zoneKey) {
+            playSound('click');
+            document.querySelectorAll('.zone-tab').forEach(btn => {
+                btn.className = 'zone-tab font-game py-3 px-4 rounded-2xl border-2 border-slate-200 bg-white text-slate-700 font-bold text-sm text-center transition';
+            });
+
+            const activeBtn = document.getElementById(`tab-${zoneKey}`);
+            activeBtn.className = 'zone-tab font-game py-3 px-4 rounded-2xl border-2 border-sky-500 bg-sky-500 text-white font-bold text-sm text-center transition shadow-md scale-105';
+
+            renderZoneContent(zoneKey);
+        }
+
+        function renderZoneContent(key) {
+            const z = zonesData[key];
+            const container = document.getElementById('zone-content');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4 p-4 rounded-2xl ${z.bg} border">
+                        <div class="text-4xl">${z.icon}</div>
+                        <div>
+                            <h3 class="font-game text-2xl font-bold text-slate-800">${z.title}</h3>
+                            <p class="text-xs font-semibold text-slate-600">Jenis Iklim Utama: <span class="text-sky-700">${z.climates}</span></p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <h4 class="font-bold text-slate-800 mb-1"><i class="fa-solid fa-earth-asia text-sky-500 mr-1.5"></i> Negara Contoh</h4>
+                            <p class="text-slate-600">${z.countries}</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <h4 class="font-bold text-slate-800 mb-1"><i class="fa-solid fa-temperature-high text-amber-500 mr-1.5"></i> Ciri-ciri Ciri Utama</h4>
+                            <p class="text-slate-600">${z.features}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-game text-lg font-bold text-slate-800 mb-3"><i class="fa-solid fa-briefcase text-purple-500 mr-2"></i>Kegiatan Manusia Utama</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            ${z.activities.map(a => `
+                                <div class="p-4 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-start gap-3">
+                                    <div class="p-2 bg-purple-100 text-purple-700 rounded-xl font-bold text-xs mt-0.5"><i class="fa-solid fa-check"></i></div>
+                                    <div>
+                                        <h5 class="font-bold text-slate-800 text-sm">${a.name}</h5>
+                                        <p class="text-xs text-slate-600 mt-0.5 leading-relaxed">${a.desc}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function completeMission1() {
+            if (!gameState.missionsCompleted.m1) {
+                gameState.missionsCompleted.m1 = true;
+                addXP(100);
+            } else {
+                playSound('click');
+            }
+            returnToDashboard();
+        }
+
+        const m2Data = [
+            { id: 1, country: 'Arab Saudi', zone: 'Zon Panas' },
+            { id: 2, country: 'Jepun (Utara / Hokkaido)', zone: 'Zon Sejuk Sederhana' },
+            { id: 3, country: 'Siberia (Rusia)', zone: 'Zon Sejuk' },
+            { id: 4, country: 'Korea Selatan / China Tengah', zone: 'Zon Panas Sederhana' }
+        ];
+
+        let m2SelectedCountry = null;
+        let m2MatchedCount = 0;
+
+        function initMission2() {
+            m2SelectedCountry = null;
+            m2MatchedCount = 0;
+            document.getElementById('m2-score').innerText = '0';
+            const btn = document.getElementById('m2-complete-btn');
+            btn.disabled = true;
+            btn.className = 'bg-slate-300 text-slate-500 font-game px-6 py-2.5 rounded-xl cursor-not-allowed';
+
+            const countryContainer = document.getElementById('match-countries-container');
+            const zoneContainer = document.getElementById('match-zones-container');
+
+            countryContainer.innerHTML = '';
+            zoneContainer.innerHTML = '';
+
+            // Render Countries
+            m2Data.forEach(item => {
+                const div = document.createElement('div');
+                div.id = `m2-c-${item.id}`;
+                div.className = 'p-3.5 bg-sky-50 border-2 border-sky-200 rounded-2xl font-bold text-sm text-slate-800 cursor-pointer hover:bg-sky-100 transition flex items-center justify-between';
+                div.innerHTML = `<span><i class="fa-solid fa-flag text-sky-500 mr-2"></i>${item.country}</span> <i class="fa-regular fa-circle text-sky-300"></i>`;
+                div.onclick = () => selectM2Country(item);
+                countryContainer.appendChild(div);
+            });
+
+            // Render Zones (Shuffled)
+            const shuffledZones = [...m2Data].sort(() => Math.random() - 0.5);
+            shuffledZones.forEach(item => {
+                const div = document.createElement('div');
+                div.id = `m2-z-${item.id}`;
+                div.className = 'p-3.5 bg-amber-50 border-2 border-amber-200 rounded-2xl font-bold text-sm text-slate-800 cursor-pointer hover:bg-amber-100 transition flex items-center justify-between';
+                div.innerHTML = `<span><i class="fa-solid fa-temperature-high text-amber-500 mr-2"></i>${item.zone}</span> <i class="fa-regular fa-square text-amber-300"></i>`;
+                div.onclick = () => selectM2Zone(item);
+                zoneContainer.appendChild(div);
+            });
+        }
+
+        function selectM2Country(item) {
+            if (document.getElementById(`m2-c-${item.id}`).classList.contains('opacity-40')) return;
+            playSound('click');
+            m2SelectedCountry = item;
+
+            // Reset borders for countries
+            m2Data.forEach(i => {
+                const el = document.getElementById(`m2-c-${i.id}`);
+                if (!el.classList.contains('opacity-40')) {
+                    el.className = 'p-3.5 bg-sky-50 border-2 border-sky-200 rounded-2xl font-bold text-sm text-slate-800 cursor-pointer hover:bg-sky-100 transition flex items-center justify-between';
+                }
+            });
+
+            const selEl = document.getElementById(`m2-c-${item.id}`);
+            selEl.className = 'p-3.5 bg-sky-200 border-2 border-sky-500 rounded-2xl font-bold text-sm text-sky-900 cursor-pointer transition flex items-center justify-between ring-2 ring-sky-300';
+        }
+
+        function selectM2Zone(targetItem) {
+            if (!m2SelectedCountry) {
+                showToast('⚠️ Sila pilih Negara terlebih dahulu!');
+                playSound('error');
+                return;
+            }
+
+            if (m2SelectedCountry.id === targetItem.id) {
+                // Correct Match
+                playSound('success');
+                showToast('✅ Tepat Sekali!');
+
+                const cEl = document.getElementById(`m2-c-${m2SelectedCountry.id}`);
+                const zEl = document.getElementById(`m2-z-${targetItem.id}`);
+
+                cEl.className = 'p-3.5 bg-emerald-100 border-2 border-emerald-400 rounded-2xl font-bold text-sm text-emerald-900 opacity-40 pointer-events-none flex items-center justify-between';
+                cEl.innerHTML = `<span><i class="fa-solid fa-check text-emerald-600 mr-2"></i>${m2SelectedCountry.country}</span>`;
+
+                zEl.className = 'p-3.5 bg-emerald-100 border-2 border-emerald-400 rounded-2xl font-bold text-sm text-emerald-900 opacity-40 pointer-events-none flex items-center justify-between';
+                zEl.innerHTML = `<span><i class="fa-solid fa-check text-emerald-600 mr-2"></i>${targetItem.zone}</span>`;
+
+                m2SelectedCountry = null;
+                m2MatchedCount++;
+                document.getElementById('m2-score').innerText = m2MatchedCount;
+
+                if (m2MatchedCount === 4) {
+                    const btn = document.getElementById('m2-complete-btn');
+                    btn.disabled = false;
+                    btn.className = 'bg-emerald-500 hover:bg-emerald-600 text-white font-game px-6 py-2.5 rounded-xl btn-bounce cursor-pointer';
+                }
+            } else {
+                // Wrong match
+                playSound('error');
+                showToast('❌ Padanan kurang tepat, cuba lagi!');
+            }
+        }
+
+        function completeMission2() {
+            if (!gameState.missionsCompleted.m2) {
+                gameState.missionsCompleted.m2 = true;
+                addXP(100);
+            }
+            returnToDashboard();
+        }
+
+        const m3Questions = [
+            {
+                question: 'Mengapakah sektor perikanan sangat maju di kawasan Iklim Laurentia seperti Hokkaido (Jepun)?',
+                options: [
+                    'Pertemuan Arus Panas (Kuroshio) & Arus Sejuk (Oyashio) yang kaya dengan plankton.',
+                    'Suhu air laut sentiasa berada di bawah 0°C sepanjang tahun.',
+                    'Penggunaan unta sebagai pengangkutan utama ke pelabuhan.',
+                    'Musim panas yang panjang melebihi 10 bulan.'
+                ],
+                answer: 0,
+                explain: 'Pertemuan Arus Panas Kuroshio dan Arus Sejuk Oyashio menjadikan perairan Jepun tempat pembiakan plankton yang sangat kaya bagi ikan!'
+            },
+            {
+                question: 'Kegiatan penternakan unta, kambing, dan penanaman pokok kurma sangat sinonim dengan kawasan:',
+                options: [
+                    'Zon Sejuk Tundra',
+                    'Zon Panas (Iklim Gurun Panas)',
+                    'Zon Sejuk Sederhana (Iklim Laurentia)',
+                    'Zon Panas Sederhana (Iklim Mediterranean)'
+                ],
+                answer: 1,
+                explain: 'Kawasan Gurun Panas seperti Arab Saudi mempunyai cuaca panas & kering yang sesuai untuk tanaman kurma serta penternakan unta.'
+            },
+            {
+                question: 'Apakah kegiatan utama penduduk Inuit/Eskimo di kawasan Iklim Tundra (Zon Sejuk)?',
+                options: [
+                    'Penanaman padi sawah dan getah.',
+                    'Penternakan ulat sutera dan pokok teh.',
+                    'Memburu anjing laut dan menangkap ikan.',
+                    'Pembalakan kayu keras tropical.'
+                ],
+                answer: 2,
+                explain: 'Di Zon Sejuk (Siberia/Tundra), tanah berfros menghalang pertanian, jadi pemburuan anjing laut & rusa kutub adalah sumber utama survival.'
+            },
+            {
+                question: 'Apakah jenis hutan yang dibalak di Zon Sejuk Sederhana bagi industri kertas dan pembinaan?',
+                options: [
+                    'Hujan Tropika',
+                    'Pokok Konifer / Kayu Lembut (Taiga)',
+                    'Hutan Mangrove',
+                    'Pokok Pokok Palma Kurma'
+                ],
+                answer: 1,
+                explain: 'Hutan konifer di zon sejuk sederhana membekalkan kayu lembut bagi industri pembalakan & pembuatan kertas.'
+            }
+        ];
+
+        let m3Index = 0;
+
+        function initMission3() {
+            m3Index = 0;
+            renderM3Question();
+        }
+
+        function renderM3Question() {
+            const q = m3Questions[m3Index];
+            document.getElementById('m3-q-num').innerText = `Soalan ${m3Index + 1} dari ${m3Questions.length}`;
+            document.getElementById('m3-next-btn').classList.add('hidden');
+
+            const box = document.getElementById('m3-question-box');
+            box.innerHTML = `
+                <h3 class="font-game text-lg font-bold text-slate-800 leading-snug">${q.question}</h3>
+                <div class="space-y-2.5 mt-4">
+                    ${q.options.map((opt, idx) => `
+                        <button onclick="checkM3Answer(${idx})" id="m3-opt-${idx}" 
+                            class="w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-purple-300 hover:bg-purple-50/50 transition font-medium text-sm text-slate-700 flex items-center justify-between">
+                            <span>${opt}</span>
+                            <i class="fa-regular fa-circle text-slate-300"></i>
+                        </button>
+                    `).join('')}
+                </div>
+                <div id="m3-explain-box" class="hidden mt-4 p-4 rounded-2xl bg-purple-50 border border-purple-200 text-xs text-purple-900 leading-relaxed"></div>
+            `;
+        }
+
+        function checkM3Answer(selectedIdx) {
+            const q = m3Questions[m3Index];
+            const opts = document.querySelectorAll('#m3-question-box button');
+            opts.forEach(btn => btn.disabled = true);
+
+            const explainBox = document.getElementById('m3-explain-box');
+            explainBox.classList.remove('hidden');
+
+            if (selectedIdx === q.answer) {
+                playSound('success');
+                document.getElementById(`m3-opt-${selectedIdx}`).className = 'w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 font-bold text-sm text-emerald-900 flex items-center justify-between';
+                explainBox.innerHTML = `<b>🎉 Jawapan Tepat!</b><br>${q.explain}`;
+            } else {
+                playSound('error');
+                document.getElementById(`m3-opt-${selectedIdx}`).className = 'w-full text-left p-4 rounded-2xl border-2 border-rose-500 bg-rose-50 font-bold text-sm text-rose-900 flex items-center justify-between';
+                document.getElementById(`m3-opt-${q.answer}`).className = 'w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 font-bold text-sm text-emerald-900 flex items-center justify-between';
+                explainBox.innerHTML = `<b>💡 Penerangan:</b><br>${q.explain}`;
+            }
+
+            const nextBtn = document.getElementById('m3-next-btn');
+            nextBtn.classList.remove('hidden');
+            if (m3Index === m3Questions.length - 1) {
+                nextBtn.innerText = 'Selesaikan Misi 3';
+            } else {
+                nextBtn.innerText = 'Soalan Seterusnya';
+            }
+        }
+
+        function nextMission3Question() {
+            playSound('click');
+            if (m3Index < m3Questions.length - 1) {
+                m3Index++;
+                renderM3Question();
+            } else {
+                if (!gameState.missionsCompleted.m3) {
+                    gameState.missionsCompleted.m3 = true;
+                    addXP(150);
+                }
+                returnToDashboard();
+            }
+        }
+
+        const m4Questions = [
+            {
+                tp: 'TP 1 (Mengingat)',
+                question: 'Berapakah bilangan zon iklim utama di benua Asia?',
+                options: ['2 Zon', '4 Zon', '6 Zon', '8 Zon'],
+                answer: 1
+            },
+            {
+                tp: 'TP 2 (Memahami)',
+                question: 'Antara kombinasi berikut, yang manakah BENAR padanan zon iklim dan negara contohnya?',
+                options: [
+                    'Zon Sejuk ➔ Malaysia',
+                    'Zon Panas ➔ Arab Saudi',
+                    'Zon Sejuk Sederhana ➔ Thailand',
+                    'Zon Panas Sederhana ➔ Siberia'
+                ],
+                answer: 1
+            },
+            {
+                tp: 'TP 3 (Mengaplikasi)',
+                question: 'Sekiranya seorang petani ingin mengusahakan tanaman pokok teh dan penternakan ulat sutera, rantau iklim manakah yang paling sesuai?',
+                options: [
+                    'Iklim China (Zon Panas Sederhana)',
+                    'Iklim Tundra (Zon Sejuk)',
+                    'Iklim Gurun Panas (Zon Panas)',
+                    'Iklim Laurentia (Zon Sejuk Sederhana)'
+                ],
+                answer: 0
+            }
+        ];
+
+        let m4Index = 0;
+        let m4Score = 0;
+
+        function initMission4() {
+            m4Index = 0;
+            m4Score = 0;
+            renderM4Question();
+        }
+
+        function renderM4Question() {
+            const q = m4Questions[m4Index];
+            document.getElementById('m4-q-num').innerText = `Soalan ${m4Index + 1} dari ${m4Questions.length}`;
+            document.getElementById('m4-tp-badge').innerText = q.tp;
+            document.getElementById('m4-next-btn').classList.add('hidden');
+
+            const box = document.getElementById('m4-question-box');
+            box.innerHTML = `
+                <h3 class="font-game text-lg font-bold text-slate-800 leading-snug">${q.question}</h3>
+                <div class="space-y-2.5 mt-4">
+                    ${q.options.map((opt, idx) => `
+                        <button onclick="checkM4Answer(${idx})" id="m4-opt-${idx}" 
+                            class="w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-amber-300 hover:bg-amber-50/50 transition font-medium text-sm text-slate-700 flex items-center justify-between">
+                            <span>${opt}</span>
+                            <i class="fa-regular fa-circle text-slate-300"></i>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function checkM4Answer(selectedIdx) {
+            const q = m4Questions[m4Index];
+            const opts = document.querySelectorAll('#m4-question-box button');
+            opts.forEach(btn => btn.disabled = true);
+
+            if (selectedIdx === q.answer) {
+                playSound('success');
+                m4Score++;
+                document.getElementById(`m4-opt-${selectedIdx}`).className = 'w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 font-bold text-sm text-emerald-900 flex items-center justify-between';
+            } else {
+                playSound('error');
+                document.getElementById(`m4-opt-${selectedIdx}`).className = 'w-full text-left p-4 rounded-2xl border-2 border-rose-500 bg-rose-50 font-bold text-sm text-rose-900 flex items-center justify-between';
+                document.getElementById(`m4-opt-${q.answer}`).className = 'w-full text-left p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 font-bold text-sm text-emerald-900 flex items-center justify-between';
+            }
+
+            const nextBtn = document.getElementById('m4-next-btn');
+            nextBtn.classList.remove('hidden');
+            if (m4Index === m4Questions.length - 1) {
+                nextBtn.innerText = 'Selesai Refleksi TP';
+            } else {
+                nextBtn.innerText = 'Seterusnya';
+            }
+        }
+
+        function nextMission4Question() {
+            playSound('click');
+            if (m4Index < m4Questions.length - 1) {
+                m4Index++;
+                renderM4Question();
+            } else {
+                if (!gameState.missionsCompleted.m4) {
+                    gameState.missionsCompleted.m4 = true;
+                    addXP(150);
+                }
+                gameState.m4Score = m4Score;
+                returnToDashboard();
+            }
+        }
+
+        function showCertificate() {
+            playSound('fanfare');
+            document.getElementById('screen-dashboard').classList.add('hidden');
+            document.getElementById('screen-certificate').classList.remove('hidden');
+
+            document.getElementById('cert-student-name').innerText = gameState.playerName.toUpperCase();
+            document.getElementById('cert-student-class').innerText = `Kelas: ${gameState.playerClass}`;
+            document.getElementById('cert-xp').innerText = `${gameState.xp} XP`;
+            
+            // Assign TP based on quiz performance
+            let tpLevel = 'TP 3';
+            if (gameState.m4Score === 3) tpLevel = 'TP 3 (Cemerlang)';
+            else if (gameState.m4Score === 2) tpLevel = 'TP 2 (Baik)';
+            else tpLevel = 'TP 1 (Memuaskan)';
+
+            document.getElementById('cert-tp').innerText = tpLevel;
+
+            // Trigger Confetti Animation
+            if (window.confetti) {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        // Initialize application on load
+        window.onload = function() {
+            initLoginScreen();
+        };
+    </script>
+</body>
+</html>
